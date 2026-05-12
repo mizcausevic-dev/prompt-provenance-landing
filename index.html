@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prompt Provenance — versioned, lineaged, reviewable LLM prompts</title>
+  <meta name="description" content="An open JSON specification for production LLM prompt records: SHA-256 content hash, lineage / derivation, authorship, eval results, approval state. Part of the Kinetic Gain Protocol Suite." />
+  <meta name="theme-color" content="#047857" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Prompt Provenance — open spec for production LLM prompts" />
+  <meta property="og:url" content="https://prompts.kineticgain.com/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="/" class="brand">
+        <span class="brand-mark">⊰</span>
+        <span class="brand-text">
+          <strong>Prompt Provenance</strong>
+          <small>Kinetic Gain Protocol Suite</small>
+        </span>
+      </a>
+      <nav class="nav-links">
+        <a href="#why">Why</a>
+        <a href="#spec">Spec</a>
+        <a href="#example">Example</a>
+        <a href="#tooling">Tooling</a>
+        <a class="cta" href="https://github.com/mizcausevic-dev/prompt-provenance-spec" target="_blank" rel="noreferrer">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <span class="pill">v0.1 draft · core spec</span>
+        <h1>Treat your LLM prompts<br /><em>like production code.</em></h1>
+        <p class="lede">
+          <strong>Prompt Provenance</strong> is an open JSON specification for versioned, lineaged,
+          reviewable LLM prompt records. SHA-256 content hash. Parent / derivation type / change summary.
+          Author + reviewer + approver chain. Eval results + approval state. The disclosure document that
+          turns "we changed our system prompt" from a Slack message into a reproducible record.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="https://github.com/mizcausevic-dev/prompt-provenance-spec" target="_blank" rel="noreferrer">Read the spec</a>
+          <a class="btn btn-secondary" href="https://mizcausevic-dev.github.io/kinetic-gain-visualizer/?view=editor" target="_blank" rel="noreferrer">Try the visualizer</a>
+        </div>
+        <ul class="hero-bullets">
+          <li><span class="dot dot-accent"></span> <strong>SHA-256 content hash</strong> over canonical UTF-8 binds the record to the exact prompt bytes</li>
+          <li><span class="dot dot-accent"></span> <strong>Lineage chain</strong> via <code>parent</code> + <code>derivation</code> (<code>fork</code> / <code>tune</code> / <code>patch</code>)</li>
+          <li><span class="dot dot-accent"></span> Cited from Agent Cards (<code>capabilities.prompts_used[]</code>) and AI Evidence (<code>retrieval.prompt_provenance_uri</code>)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="why" class="block">
+      <div class="block-inner">
+        <h2>Why a prompt-provenance spec?</h2>
+        <p class="prose">
+          LLM prompts are the source code of agentic systems. Yet most production deployments store them as ad-hoc strings in repo files, sometimes in databases, sometimes in deployment configs — with no consistent format for lineage, no required eval gate, no signed approval. When something goes wrong, "which prompt was running?" is a forensic exercise. Prompt Provenance fixes that.
+        </p>
+        <div class="grid grid-3">
+          <article class="card">
+            <h3>Identity + hash</h3>
+            <p><code>prompt.id</code>, semver <code>version</code>, canonical SHA-256 <code>hash</code>, plus <code>content_uri</code> and <code>content_type</code> (jinja2, mustache, plaintext). A grader can recompute the hash and prove the record binds to specific bytes.</p>
+          </article>
+          <article class="card">
+            <h3>Lineage</h3>
+            <p><code>lineage.parent</code> · <code>derivation</code> (<code>fork</code> / <code>tune</code> / <code>patch</code>) · <code>change_summary</code>. Walk the chain to see how a production prompt evolved.</p>
+          </article>
+          <article class="card">
+            <h3>Authorship + approval</h3>
+            <p><code>created_by</code> · <code>reviewed_by[]</code> · <code>approved_by</code> · timestamps. The minimum auditable record of who said this prompt is safe to ship.</p>
+          </article>
+          <article class="card">
+            <h3>Intent</h3>
+            <p><code>purpose</code> · <code>in_scope[]</code> · <code>out_of_scope[]</code> · <code>models_supported[]</code>. Forces the author to write down what the prompt is and isn't for — before shipping.</p>
+          </article>
+          <article class="card">
+            <h3>Evaluations</h3>
+            <p><code>evaluations[]</code> entries: suite name, result URI, score, passed flag, ran-at timestamp. Procurement-grade evidence that the prompt was tested before release.</p>
+          </article>
+          <article class="card">
+            <h3>Approval state</h3>
+            <p><code>approval.state</code> ∈ <code>{draft, under_review, approved, rejected, deprecated}</code>. The single most important field — it gates production deploys via <code>approval.policy_uri</code>.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="spec" class="block block-tinted">
+      <div class="block-inner">
+        <h2>The required sections</h2>
+        <ol class="numbered">
+          <li><strong><code>provenance_version</code></strong> — must be <code>"0.1"</code> for this draft</li>
+          <li><strong><code>prompt</code></strong> — identity, version, SHA-256 hash, content URI, content type</li>
+          <li><strong><code>lineage</code></strong> (optional) — parent record, derivation type, change summary</li>
+          <li><strong><code>authorship</code></strong> (optional) — created / reviewed / approved by + timestamps</li>
+          <li><strong><code>intent</code></strong> (optional) — purpose, in_scope, out_of_scope, models_supported</li>
+          <li><strong><code>evaluations</code></strong> (optional) — array of <code>{ suite, result_uri, score, passed, ran_at }</code></li>
+          <li><strong><code>approval</code></strong> (optional) — <code>{ state, policy_uri }</code></li>
+        </ol>
+        <p class="prose">
+          The canonical hash uses LF line endings with a stripped trailing newline — the same convention as
+          AI Evidence Format and Student AI Disclosure, so a single hashing helper covers every spec in
+          the Suite.
+        </p>
+      </div>
+    </section>
+
+    <section id="example" class="block">
+      <div class="block-inner">
+        <h2>A canonical example</h2>
+        <p class="prose">An incident-summary prompt tuned from v1.0.0 → v1.1.0 with a recorded eval pass. The document is small; the receipts are complete.</p>
+        <pre class="code-block"><code>{
+  "provenance_version": "0.1",
+  "prompt": {
+    "id": "incident-summary-generator",
+    "name": "Incident Summary Generator",
+    "version": "1.1.0",
+    "hash": "sha256:b4c2f0e3d7e5f9b1a8c6d3e0f2b5a7c9d1e3f5a7b9c1d3e5f7a9b1c3d5e7f9b1",
+    "content_uri": "https://example.com/prompts/incident-summary/v1.1.0/template.j2",
+    "content_type": "text/jinja2"
+  },
+  "lineage": {
+    "parent": "incident-summary-generator@1.0.0",
+    "derivation": "tune",
+    "change_summary": "Tightened the rubric for synthesizing duration; added explicit instruction to omit speculative root cause."
+  },
+  "authorship": {
+    "created_by": "engineer@example.com",
+    "reviewed_by": ["sre-lead@example.com", "principal-eng@example.com"],
+    "approved_by": "principal-eng@example.com",
+    "created_at": "2026-05-12T02:00:00Z",
+    "approved_at": "2026-05-12T02:45:00Z"
+  },
+  "intent": {
+    "purpose": "Summarize an incident timeline into a 200-word post-mortem opening section.",
+    "models_supported": ["claude-opus-4-*", "claude-sonnet-4-*"]
+  },
+  "evaluations": [
+    {
+      "suite": "incident-summary-quality-v3",
+      "result_uri": "https://eval.example.com/runs/123",
+      "score": 0.94,
+      "passed": true,
+      "ran_at": "2026-05-12T02:15:00Z"
+    }
+  ],
+  "approval": { "state": "approved" }
+}</code></pre>
+      </div>
+    </section>
+
+    <section id="tooling" class="block block-dark">
+      <div class="block-inner">
+        <h2>Tooling around the spec</h2>
+        <div class="grid grid-3">
+          <a class="card card-dark" href="https://github.com/mizcausevic-dev/prompt-provenance-spec" target="_blank" rel="noreferrer">
+            <div class="card-eyebrow">Specification</div>
+            <h3>prompt-provenance-spec</h3>
+            <p>Normative spec, JSON Schema 2020-12, canonical examples. AGPL-3.0 for spec text; implementations unrestricted.</p>
+            <span class="link">View repo →</span>
+          </a>
+          <a class="card card-dark" href="https://mizcausevic-dev.github.io/kinetic-gain-visualizer/" target="_blank" rel="noreferrer">
+            <div class="card-eyebrow">Visualizer</div>
+            <h3>kinetic-gain-visualizer</h3>
+            <p>Unified visualizer for all 10 specs. Auto-detects via <code>provenance_version</code> and renders a procurement-grade view with lineage chain + approval state.</p>
+            <span class="link">Open visualizer →</span>
+          </a>
+          <a class="card card-dark" href="https://github.com/mizcausevic-dev/mcp-kinetic-gain" target="_blank" rel="noreferrer">
+            <div class="card-eyebrow">MCP server</div>
+            <h3>mcp-kinetic-gain</h3>
+            <p>3 dedicated tools: <code>prompt_provenance_validate</code>, <code>prompt_provenance_inspect</code>, <code>prompt_provenance_eval_result</code>. Drops into Claude Desktop with one config entry.</p>
+            <span class="link">View on GitHub →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-inner block-narrow">
+        <h2>About the Kinetic Gain Protocol Suite</h2>
+        <p class="prose">
+          Prompt Provenance is one of <strong>ten open JSON specifications</strong> in the Kinetic Gain Protocol Suite. The Suite spans entity declaration (<a href="https://github.com/mizcausevic-dev/aeo-protocol-spec" target="_blank" rel="noreferrer">AEO</a>), agent disclosure (<a href="https://github.com/mizcausevic-dev/agent-cards-spec" target="_blank" rel="noreferrer">Agent Cards</a>), citation evidence (<a href="https://github.com/mizcausevic-dev/ai-evidence-format-spec" target="_blank" rel="noreferrer">AI Evidence</a>), tool disclosure (<a href="https://github.com/mizcausevic-dev/mcp-tool-card-spec" target="_blank" rel="noreferrer">MCP Tool Cards</a>), plus the <a href="https://tutor.kineticgain.com" target="_blank" rel="noreferrer">EdTech trio</a>, the <a href="https://clinical.kineticgain.com" target="_blank" rel="noreferrer">HealthTech extension</a>, and the cross-cutting <a href="https://github.com/mizcausevic-dev/ai-incident-card-spec" target="_blank" rel="noreferrer">Incident Card</a>. <strong>Front door: <a href="https://suite.kineticgain.com" target="_blank" rel="noreferrer">suite.kineticgain.com</a></strong>.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <small>© 2026 Miz Causevic · <a href="https://kineticgain.com" target="_blank" rel="noreferrer">kineticgain.com</a> · <a href="https://github.com/mizcausevic-dev" target="_blank" rel="noreferrer">GitHub</a> · <a href="https://www.linkedin.com/in/mirzacausevic/" target="_blank" rel="noreferrer">LinkedIn</a></small>
+      <small class="code">prompts.kineticgain.com · Prompt Provenance v0.1</small>
+    </div>
+  </footer>
+</body>
+</html>
