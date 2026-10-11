@@ -10,7 +10,7 @@
   <meta property="og:title" content="Prompt Provenance — open spec for production LLM prompts" />
   <meta property="og:url" content="https://prompts.kineticgain.com/" />
   <link rel="stylesheet" href="/assets/fonts.css" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=972e9256ae60ea70" />
 </head>
 <body>
   <header class="nav">
@@ -84,7 +84,7 @@
           </article>
           <article class="card">
             <h3>Approval state</h3>
-            <p><code>approval.state</code> ∈ <code>{draft, under_review, approved, rejected, deprecated}</code>. The single most important field — it gates production deploys via <code>approval.policy_uri</code>.</p>
+            <p><code>approval.state</code> ∈ <code>{draft, under_review, approved, rejected, deprecated}</code>. It records review state and <code>approval.policy_uri</code>; a separate deployment gate must verify and enforce that policy.</p>
           </article>
         </div>
       </div>
@@ -161,19 +161,19 @@
           <a class="card card-dark" href="https://github.com/mizcausevic-dev/prompt-provenance-spec" target="_blank" rel="noreferrer">
             <div class="card-eyebrow">Specification</div>
             <h3>prompt-provenance-spec</h3>
-            <p>Normative spec, JSON Schema 2020-12, canonical examples. AGPL-3.0 for spec text; implementations unrestricted.</p>
+            <p>Normative spec, JSON Schema 2020-12, canonical examples. MIT-licensed spec text, schema, and examples; reference implementations licensed separately.</p>
             <span class="link">View repo →</span>
           </a>
           <a class="card card-dark" href="https://mizcausevic-dev.github.io/kinetic-gain-visualizer/" target="_blank" rel="noreferrer">
             <div class="card-eyebrow">Visualizer</div>
             <h3>kinetic-gain-visualizer</h3>
-            <p>Unified visualizer for all 10 specs. Auto-detects via <code>provenance_version</code> and renders a procurement-grade view with lineage chain + approval state.</p>
+            <p>Unified visualizer for supported Suite documents. Auto-detects via <code>provenance_version</code> and renders a procurement-grade view with lineage chain + approval state.</p>
             <span class="link">Open visualizer →</span>
           </a>
           <a class="card card-dark" href="https://github.com/mizcausevic-dev/mcp-kinetic-gain" target="_blank" rel="noreferrer">
             <div class="card-eyebrow">MCP server</div>
             <h3>mcp-kinetic-gain</h3>
-            <p>3 dedicated tools: <code>prompt_provenance_validate</code>, <code>prompt_provenance_inspect</code>, <code>prompt_provenance_eval_result</code>. Drops into Claude Desktop with one config entry.</p>
+            <p>v0.10.0 offers 75 tools for 12 Suite specs, DefenseTech checks, and implementation previews. Three dedicated Prompt Provenance tools: <code>prompt_provenance_validate</code>, <code>prompt_provenance_inspect</code>, <code>prompt_provenance_eval_result</code>. Drops into Claude Desktop with one config entry.</p>
             <span class="link">View on GitHub →</span>
           </a>
         </div>
@@ -184,7 +184,7 @@
       <div class="block-inner block-narrow">
         <h2>About the Kinetic Gain Protocol Suite</h2>
         <p class="prose">
-          Prompt Provenance is one of <strong>ten open JSON specifications</strong> in the Kinetic Gain Protocol Suite. The Suite spans entity declaration (<a href="https://github.com/mizcausevic-dev/aeo-protocol-spec" target="_blank" rel="noreferrer">AEO</a>), agent disclosure (<a href="https://github.com/mizcausevic-dev/agent-cards-spec" target="_blank" rel="noreferrer">Agent Cards</a>), citation evidence (<a href="https://github.com/mizcausevic-dev/ai-evidence-format-spec" target="_blank" rel="noreferrer">AI Evidence</a>), tool disclosure (<a href="https://github.com/mizcausevic-dev/mcp-tool-card-spec" target="_blank" rel="noreferrer">MCP Tool Cards</a>), plus the <a href="https://tutor.kineticgain.com" target="_blank" rel="noreferrer">EdTech trio</a>, the <a href="https://clinical.kineticgain.com" target="_blank" rel="noreferrer">HealthTech extension</a>, and the cross-cutting <a href="https://github.com/mizcausevic-dev/ai-incident-card-spec" target="_blank" rel="noreferrer">Incident Card</a>. <strong>Front door: <a href="https://suite.kineticgain.com" target="_blank" rel="noreferrer">suite.kineticgain.com</a></strong>.
+          Prompt Provenance is one of <strong>twelve open JSON specifications</strong> in the Kinetic Gain Protocol Suite. The Suite spans entity declaration (<a href="https://github.com/mizcausevic-dev/aeo-protocol-spec" target="_blank" rel="noreferrer">AEO</a>), agent disclosure (<a href="https://github.com/mizcausevic-dev/agent-cards-spec" target="_blank" rel="noreferrer">Agent Cards</a>), citation evidence (<a href="https://github.com/mizcausevic-dev/ai-evidence-format-spec" target="_blank" rel="noreferrer">AI Evidence</a>), tool disclosure (<a href="https://github.com/mizcausevic-dev/mcp-tool-card-spec" target="_blank" rel="noreferrer">MCP Tool Cards</a>), plus the <a href="https://tutor.kineticgain.com" target="_blank" rel="noreferrer">EdTech trio</a>, the <a href="https://clinical.kineticgain.com" target="_blank" rel="noreferrer">HealthTech extension</a>, the cross-cutting <a href="https://github.com/mizcausevic-dev/ai-incident-card-spec" target="_blank" rel="noreferrer">Incident Card</a>, the <a href="https://decisions.kineticgain.com" target="_blank" rel="noreferrer">AI Procurement Decision Card</a>, and the <a href="https://github.com/mizcausevic-dev/ai-claims-decision-card-spec" target="_blank" rel="noreferrer">AI Claims Decision Card</a>. <strong>Front door: <a href="https://suite.kineticgain.com" target="_blank" rel="noreferrer">suite.kineticgain.com</a></strong>.
         </p>
       </div>
     </section>
